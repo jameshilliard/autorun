@@ -1,0 +1,21 @@
+name: "run workflows"
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  autorun:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "${{ toJSON(github) }}"
+      - uses: octokit/request-action@v2.x
+        id: autorun
+        with:
+          baseUrl: https://github.com
+          route: POST /{owner}/{repo}/pull/{pull_number}/run_workflows
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          pull_number: ${{ github.event.pull_request.number }}
+          body: "authenticity_token=${{ github.token }}&pull_request_id=${{ github.event.pull_request.node_id }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
